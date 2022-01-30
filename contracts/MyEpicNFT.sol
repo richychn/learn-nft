@@ -14,13 +14,12 @@ import { Base64 } from "./libraries/Base64.sol";
 contract MyEpicNFT is ERC721URIStorage {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
-  uint256 private _maxTokens = 10;
+  uint256 private _maxTokens = 4;
 
-  string baseSvg = "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='black' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
-
-  string[] firstWords = ["Red", "Green", "Blue", "Purple", "Yellow", "Pink", "Indigo", "Orange", "Crimson", "Emerald"];
-  string[] secondWords = ["Goat", "Lamb", "Sheep", "Cow", "Dog", "Cat", "Seagull", "Pigeon", "Chicken", "Duck", "Bat", "Tuna", "Salmon", "Shark"];
-  string[] thirdWords = ["Kimchi", "Dumpling", "Ramen", "Curry", "Noodles", "Fries", "Sandwhich", "Salad", "Soup", "Chowder", "Wonton", "Pancake", "Wrap", "Shawarma", "Teriyaki"];
+  string[] images = ["https://scontent-bos3-1.cdninstagram.com/v/t51.2885-15/e35/s1080x1080/272839627_706756147366425_6394671552451317214_n.jpg?_nc_ht=scontent-bos3-1.cdninstagram.com&_nc_cat=109&_nc_ohc=kd33eEmW5QwAX_5GcTz&edm=ALQROFkBAAAA&ccb=7-4&ig_cache_key=Mjc2MjM3MTQwODY1NjYzNTMxMg%3D%3D.2-ccb7-4&oh=00_AT8bJ5R9yoEfUUgmu-N-6MqbHoA9odFW6M0HkF7ZLFbPZg&oe=61FD7A65&_nc_sid=30a2ef",
+                     "https://scontent-bos3-1.cdninstagram.com/v/t51.2885-15/e35/s1080x1080/272253623_136912812130260_8528790825786736996_n.jpg?_nc_ht=scontent-bos3-1.cdninstagram.com&_nc_cat=100&_nc_ohc=8KqdHJGOvvQAX8DekuP&edm=ALQROFkBAAAA&ccb=7-4&ig_cache_key=Mjc1NzMyNzM2NzY0MTI3NDM3MQ%3D%3D.2-ccb7-4&oh=00_AT_t1_6ZQ8jIr81yFo37BmZX2lSoQi98Fcj0kdgwwxux2g&oe=61FE155F&_nc_sid=30a2ef",
+                     "https://scontent-bos3-1.cdninstagram.com/v/t51.2885-15/e35/s1080x1080/271678253_332789765197032_4908156288644405118_n.jpg?_nc_ht=scontent-bos3-1.cdninstagram.com&_nc_cat=100&_nc_ohc=dMW2dVcDxMgAX_zZPPd&edm=ALQROFkBAAAA&ccb=7-4&ig_cache_key=Mjc0Nzg0NTAyMzM4NDg2NjgwOA%3D%3D.2-ccb7-4&oh=00_AT_aPpHg2R21MbKUutWbc2rI-cJQWguoTLtLDrUg5vnWLw&oe=61FDC5C1&_nc_sid=30a2ef",
+                     "https://scontent-bos3-1.cdninstagram.com/v/t51.2885-15/e35/s1080x1080/271992638_460086472442489_676010937326160445_n.jpg?_nc_ht=scontent-bos3-1.cdninstagram.com&_nc_cat=105&_nc_ohc=DVmPkqG44LMAX9tihzD&edm=ALQROFkBAAAA&ccb=7-4&ig_cache_key=Mjc1MzY4MjYyODgyMzM2MjQ4NQ%3D%3D.2-ccb7-4&oh=00_AT8GTUFqSQD50qi4EqJAtc1HS9hrcgKHMrzq1Z2l3CJoUg&oe=61FD7DFA&_nc_sid=30a2ef"];
 
   event NewEpicNFTMinted(address sender, uint256 tokenId);
   event ReachedMaxNFTs(address sender, uint256 tokenId);
@@ -29,26 +28,8 @@ contract MyEpicNFT is ERC721URIStorage {
     console.log("This is my NFT contract. Woah!");
   }
 
-  function pickRandomFirstWord(uint256 tokenId) public view returns (string memory) {
-    uint256 rand = random(string(abi.encodePacked("FIRST_WORD", Strings.toString(tokenId))));
-    rand = rand % firstWords.length;
-    return firstWords[rand];
-  }
-
-  function pickRandomSecondWord(uint256 tokenId) public view returns (string memory) {
-    uint256 rand = random(string(abi.encodePacked("SECOND_WORD", Strings.toString(tokenId))));
-    rand = rand % secondWords.length;
-    return secondWords[rand];
-  }
-
-  function pickRandomThirdWord(uint256 tokenId) public view returns (string memory) {
-    uint256 rand = random(string(abi.encodePacked("THIRD_WORD", Strings.toString(tokenId))));
-    rand = rand % thirdWords.length;
-    return thirdWords[rand];
-  }
-
-  function random(string memory input) internal pure returns (uint256) {
-      return uint256(keccak256(abi.encodePacked(input)));
+  function pickRandomPhoto(uint256 tokenId) public view returns (string memory) {
+    return images[tokenId];
   }
 
   function countTokens() public view returns (uint256) {
@@ -63,12 +44,7 @@ contract MyEpicNFT is ERC721URIStorage {
       return;
     }
 
-    string memory first = pickRandomFirstWord(newItemId);
-    string memory second = pickRandomSecondWord(newItemId);
-    string memory third = pickRandomThirdWord(newItemId);
-    string memory combinedWord = string(abi.encodePacked(first, second, third));
-
-    string memory finalSvg = string(abi.encodePacked(baseSvg, combinedWord, "</text></svg>"));
+    string memory image = pickRandomPhoto(newItemId);
 
     // Get all the JSON metadata in place and base64 encode it.
     string memory json = Base64.encode(
@@ -77,10 +53,9 @@ contract MyEpicNFT is ERC721URIStorage {
                 abi.encodePacked(
                     '{"name": "',
                     // We set the title of our NFT as the generated word.
-                    combinedWord,
-                    '", "description": "A highly acclaimed collection of squares.", "image": "data:image/svg+xml;base64,',
-                    // We add data:image/svg+xml;base64 and then append our base64 encode our svg.
-                    Base64.encode(bytes(finalSvg)),
+                    Strings.toString(newItemId),
+                    '", "description": "Photos taken by an anonymous photographer.", "image": "',
+                    image,
                     '"}'
                 )
             )
